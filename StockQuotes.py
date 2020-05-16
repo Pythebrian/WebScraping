@@ -5,7 +5,10 @@ import datetime
 import csv
 import smtplib
 now = datetime.datetime.now()
-
+'''
+This program will allow you to collect stock prices in real time using bs4 in Python
+You can set alarm price so that Python will notify you when the price is reached!
+'''
 
 
 EMAIL_ADDRESS = "@gmail.com" #Sender
