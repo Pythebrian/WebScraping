@@ -3,28 +3,36 @@ from bs4 import BeautifulSoup as soup
 from time import localtime, strftime  
 import datetime 
 import csv
+import smtplib
 now = datetime.datetime.now()
-"""
-This program will allow you will find out real time stock price from the TMX website.
-As long as this program is running, the stock price will update as soon as a new price
-is found on the website!
 
-Change the url in parseprice() to track the stock you want!
 
-I am currently working to export the collected stock prices into a csv file to do more finanical analysis!
-"""
 
-out_filename = "RTSQ.csv"
-# header of csv file to be written
-headers = "Stock Symbol, Stock Price\n"
+EMAIL_ADDRESS = "@gmail.com" #Sender
+PASSWORD = ""   #Sender passcode
+MY_EMAIL = "@gmail.com" #Recipient (Can be the same as sender)
 
-# opens file, and writes headers
-f = open(out_filename, "w")
-f.write(headers)
+
+def send_email(subject, msg):
+    try:
+        server = smtplib.SMTP('smtp.gmail.com:587')
+        server.ehlo()
+        server.starttls()
+        server.login(EMAIL_ADDRESS, PASSWORD)
+        message = 'Subject: {}\n\n{}'.format(subject, msg)
+        server.sendmail(EMAIL_ADDRESS, MY_EMAIL, message)
+        server.quit()
+        print("Email sent!")
+    except:
+        print("Email failed to send.")
+
+subject = "Alarm"
+msg = "Price reached set value of " + set_price
+
 
 
 def parseprice():
-    url = "https://web.tmxmoney.com/quote.php?locale=en&qm_symbol=AC"
+    url = "https://web.tmxmoney.com/quote.php?locale=en&qm_symbol=AC" #Link to the tmx website, you can pick the stock you like
     uClient = uReq(url)
     page_html = uClient.read()
     uClient.close()
@@ -47,13 +55,14 @@ def parseticker():
 stored_price = 0
 count = 0
 price_list = []
+alarm = False
+
+set_price = float(input("Alarm price: "))
 while True:
     if stored_price == parseprice():
         continue
     else:
         print ("The current price is: " + str(parseprice()) + "      " + strftime("%Y-%m-%d %H:%M:%S", localtime()))
         stored_price = parseprice()
-    price_list.append(parseprice())
-   
-
-f.write(price_list[0] + "\n")
+        if parseprice() == stored_price:
+            send_email(subject, msg)
